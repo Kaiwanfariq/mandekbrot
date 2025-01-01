@@ -1,26 +1,24 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
 import streamlit as st
+
+# Read parameters from CSV
+def load_parameters():
+    df = pd.read_csv("parameters.csv")
+    return df
 
 # Mandelbrot calculation function
 def mandelbrot(c, max_iter, escape_radius=2.0):
-    """
-    Calculate the Mandelbrot set for a complex number 'c'.
-    Includes smoothing for better gradients.
-    """
     z = 0
     for n in range(max_iter):
         if abs(z) > escape_radius:
-            # Smoothing: return iteration count with fractional component
             return n - np.log(np.log(abs(z))) / np.log(2)
         z = z**2 + c
     return max_iter
 
 # Function to generate Mandelbrot set
 def generate_mandelbrot(xmin, xmax, ymin, ymax, width, height, max_iter, escape_radius):
-    """
-    Generate a Mandelbrot set image.
-    """
     real = np.linspace(xmin, xmax, width)
     imag = np.linspace(ymin, ymax, height)
     mandelbrot_set = np.empty((height, width))
@@ -36,20 +34,30 @@ def generate_mandelbrot(xmin, xmax, ymin, ymax, width, height, max_iter, escape_
 def main():
     # App title and description
     st.title("Mandelbrot Set Visualizer")
-    st.write("Use the sliders to adjust the parameters and explore the Mandelbrot set!")
+    st.write("Use the CSV file to load parameters and explore the Mandelbrot set!")
 
-    # Sidebar for user input
-    st.sidebar.header("Parameters")
-    xmin = st.sidebar.number_input("X min", value=-2.0, step=0.1, format="%.1f")
-    xmax = st.sidebar.number_input("X max", value=1.0, step=0.1, format="%.1f")
-    ymin = st.sidebar.number_input("Y min", value=-1.5, step=0.1, format="%.1f")
-    ymax = st.sidebar.number_input("Y max", value=1.5, step=0.1, format="%.1f")
-    width = st.sidebar.slider("Image Width (px)", min_value=100, max_value=2000, value=800, step=100)
-    height = st.sidebar.slider("Image Height (px)", min_value=100, max_value=2000, value=800, step=100)
-    max_iter = st.sidebar.slider("Max Iterations", min_value=10, max_value=1000, value=100, step=10)
-    colormap = st.sidebar.selectbox("Colormap", ["inferno", "plasma", "viridis", "cividis", "magma"])
-    zoom = st.sidebar.slider("Zoom Factor", min_value=1.0, max_value=10.0, value=1.0, step=0.1)
-    escape_radius = st.sidebar.number_input("Escape Radius", value=2.0, step=0.1, format="%.1f")
+    # Load parameters from CSV
+    parameters = load_parameters()
+
+    # Display available parameters
+    st.write("Available Parameters:")
+    st.write(parameters)
+
+    # Let user choose which set of parameters to use
+    param_index = st.sidebar.selectbox("Select Parameter Set", range(len(parameters)))
+
+    # Get parameters based on user selection
+    selected_params = parameters.iloc[param_index]
+    xmin = selected_params['xmin']
+    xmax = selected_params['xmax']
+    ymin = selected_params['ymin']
+    ymax = selected_params['ymax']
+    width = selected_params['width']
+    height = selected_params['height']
+    max_iter = selected_params['max_iter']
+    colormap = selected_params['colormap']
+    zoom = selected_params['zoom']
+    escape_radius = selected_params['escape_radius']
 
     # Adjust the viewing window based on zoom
     center_x = (xmin + xmax) / 2
