@@ -1,0 +1,4 @@
+your-repository/
+├── app.py            # The main Streamlit script
+├── requirements.txt  # Optional: to specify dependencies
+└── README.md         # Optional: documentation for the project
