@@ -2,51 +2,59 @@ import numpy as np
 import matplotlib.pyplot as plt
 import streamlit as st
 
-# Define the Mandelbrot set function
 def mandelbrot(c, max_iter):
+    """
+    Calculate the Mandelbrot set for a complex number 'c'.
+    Returns the number of iterations before escaping, or max_iter if bounded.
+    """
     z = 0
-    n = 0
-    while abs(z) <= 2 and n < max_iter:
-        z = z*z + c
-        n += 1
-    return n
+    for n in range(max_iter):
+        if abs(z) > 2:
+            return n
+        z = z**2 + c
+    return max_iter
 
-# Generate the Mandelbrot set image
-def mandelbrot_set(xmin, xmax, ymin, ymax, width, height, max_iter):
-    real, imag = np.linspace(xmin, xmax, width), np.linspace(ymin, ymax, height)
-    C = np.array([[complex(r, i) for r in real] for i in imag])
-    img = np.zeros(C.shape, dtype=int)
+def generate_mandelbrot(xmin, xmax, ymin, ymax, width, height, max_iter):
+    """
+    Generate a Mandelbrot set image.
+    """
+    real = np.linspace(xmin, xmax, width)
+    imag = np.linspace(ymin, ymax, height)
+    mandelbrot_set = np.empty((height, width))
     
-    for i in range(height):
-        for j in range(width):
-            img[i, j] = mandelbrot(C[i, j], max_iter)
+    for i, y in enumerate(imag):
+        for j, x in enumerate(real):
+            c = complex(x, y)
+            mandelbrot_set[i, j] = mandelbrot(c, max_iter)
     
-    return img
+    return mandelbrot_set
 
-# Streamlit UI
-st.title("Mandelbrot Set Visualization")
+def main():
+    # Streamlit app title
+    st.title("Mandelbrot Set Visualizer")
+    st.write("Use the sliders to adjust the parameters and explore the Mandelbrot set!")
 
-# User inputs for the Mandelbrot set parameters
-xmin = st.sidebar.number_input("X-Min", -2.0, -1.0, -2.0)
-xmax = st.sidebar.number_input("X-Max", 0.0, 2.0, 1.0)
-ymin = st.sidebar.number_input("Y-Min", -2.0, -1.0, -1.5)
-ymax = st.sidebar.number_input("Y-Max", 0.0, 2.0, 1.5)
-width = st.sidebar.slider("Resolution (Width)", 100, 2000, 800)
-height = st.sidebar.slider("Resolution (Height)", 100, 2000, 800)
-max_iter = st.sidebar.slider("Max Iterations", 50, 1000, 256)
+    # Sidebar for user input
+    st.sidebar.header("Parameters")
+    xmin = st.sidebar.number_input("X min", value=-2.0, step=0.1, format="%.1f")
+    xmax = st.sidebar.number_input("X max", value=1.0, step=0.1, format="%.1f")
+    ymin = st.sidebar.number_input("Y min", value=-1.5, step=0.1, format="%.1f")
+    ymax = st.sidebar.number_input("Y max", value=1.5, step=0.1, format="%.1f")
+    width = st.sidebar.slider("Image Width (px)", min_value=100, max_value=2000, value=800, step=100)
+    height = st.sidebar.slider("Image Height (px)", min_value=100, max_value=2000, value=800, step=100)
+    max_iter = st.sidebar.slider("Max Iterations", min_value=10, max_value=1000, value=100, step=10)
 
-# Generate Mandelbrot set image based on user input
-img = mandelbrot_set(xmin, xmax, ymin, ymax, width, height, max_iter)
+    # Generate Mandelbrot set
+    st.write("Generating Mandelbrot set with the current parameters...")
+    mandelbrot_set = generate_mandelbrot(xmin, xmax, ymin, ymax, width, height, max_iter)
 
-# Plot the Mandelbrot set using Matplotlib
-fig, ax = plt.subplots(figsize=(10, 10))
-ax.imshow(img, cmap='hot', extent=(xmin, xmax, ymin, ymax))
-ax.set_title("Mandelbrot Set")
-ax.set_xlabel("Real")
-ax.set_ylabel("Imaginary")
+    # Display the Mandelbrot set
+    fig, ax = plt.subplots(figsize=(10, 10))
+    ax.imshow(mandelbrot_set, extent=[xmin, xmax, ymin, ymax], cmap='inferno')
+    ax.set_title("Mandelbrot Set")
+    ax.set_xlabel("Real")
+    ax.set_ylabel("Imaginary")
+    st.pyplot(fig)
 
-# Display the plot in Streamlit
-st.pyplot(fig)
-
-# Display a color bar for reference
-st.write("Color bar represents the number of iterations before escaping.")
+if __name__ == "__main__":
+    main()
