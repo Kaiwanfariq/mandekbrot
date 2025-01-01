@@ -65,4 +65,4 @@ def main():
 
     # Display the Mandelbrot set
     fig, ax = plt.subplots(figsize=(10, 10))
-    ax.imshow(mandelbrot_set, extent=[xm
+    ax.imshow(mandelbrot_set, extent=[xmin, xmax, ymin, ymax], cmap=colormap)
