@@ -59,10 +59,32 @@ def main():
     xmin, xmax = center_x - width_range / 2, center_x + width_range / 2
     ymin, ymax = center_y - height_range / 2, center_y + height_range / 2
 
+    # Debugging: show the parameters in the app
+    st.write("Parameters used:")
+    st.write(f"xmin: {xmin}, xmax: {xmax}")
+    st.write(f"ymin: {ymin}, ymax: {ymax}")
+    st.write(f"width: {width}, height: {height}")
+    st.write(f"max_iter: {max_iter}")
+    st.write(f"colormap: {colormap}")
+    st.write(f"zoom: {zoom}")
+    st.write(f"escape_radius: {escape_radius}")
+
     # Generate Mandelbrot set
     st.write("Generating Mandelbrot set with the current parameters...")
     mandelbrot_set = generate_mandelbrot(xmin, xmax, ymin, ymax, width, height, max_iter, escape_radius)
 
-    # Display the Mandelbrot set
-    fig, ax = plt.subplots(figsize=(10, 10))
-    ax.imshow(mandelbrot_set, extent=[xmin, xmax, ymin, ymax], cmap=colormap)
+    # Check if Mandelbrot set is generated correctly
+    if mandelbrot_set.size > 0:
+        # Display the Mandelbrot set
+        fig, ax = plt.subplots(figsize=(10, 10))
+        ax.imshow(mandelbrot_set, extent=[xmin, xmax, ymin, ymax], cmap=colormap)
+        ax.set_title("Mandelbrot Set")
+        ax.set_xlabel("Real")
+        ax.set_ylabel("Imaginary")
+        st.pyplot(fig)
+    else:
+        st.write("Error: Mandelbrot set generation failed.")
+
+# Run the app
+if __name__ == "__main__":
+    main()
